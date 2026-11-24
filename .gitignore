@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.log
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Django
+db.sqlite3
+data.json
+staticfiles/
+
+# Environment
+.env
+.env.*
+!.env.example
+/hosting-output/
+/_vendor/
+
+# IDE
+.vscode/
+.idea/
+/.venv/
+/.env
+/.mysql-data/
+/.mysql-data-runtime/
+/runtime/
+/source-reference/
+/docs/
+/preview/
+/*.zip
+/private/
+/README_DHShop.md
+/scripts/build_report.py
+/scripts/capture_demo.py
+/scripts/export_report.ps1
+/scripts/package_submission.py
+/scripts/verify_report.py
+/media/*
+!/media/dhshop/
+/staticfiles/

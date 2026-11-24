@@ -1,0 +1,118 @@
+{% extends "bo_cuc_chung.html" %}
+
+{% load static tien_te %}
+
+{% block title %}{{ san_pham.ten_san_pham }} · DHShop{% endblock %}
+{% block content %}
+    <div class="site-width">
+        <nav class="breadcrumbs" aria-label="Đường dẫn">
+            <a href="{% url 'cua_hang:trang_chu' %}">Trang chủ</a>
+            <a href="{{ san_pham.danh_muc.get_absolute_url }}">{{ san_pham.danh_muc.ten_danh_muc }}</a>
+            <span>{{ san_pham.ten_san_pham }}</span>
+        </nav>
+        <section class="detail-layout">
+            <div>
+                {% include "cua_hang/_bo_anh_san_pham.html" %}
+            </div>
+            <div class="detail-copy">
+                <span class="eyebrow">DHSHOP / {{ san_pham.danh_muc.ten_danh_muc }}</span>
+                <h1 class="serif">{{ san_pham.ten_san_pham }}</h1>
+                <div class="detail-pricing">
+                    <span>{{ san_pham.gia_ban|vnd }}₫</span>{% if san_pham.phan_tram_giam_gia > 0 %}<del>{{ san_pham.gia_goc|vnd }}₫</del>
+                    <span class="small">-{{ san_pham.phan_tram_giam_gia }}%</span>{% endif %}</div>
+            <p class="detail-description">{{ san_pham.mo_ta|truncatewords:38 }}</p>
+            <form action="{% url 'gio_hang:them_vao_gio' san_pham.id %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <fieldset class="option-group border-0 m-0 px-0">
+                    <legend class="option-label">Kích thước</legend>
+                    <div class="choices">
+                        {% for kc in san_pham.danh_sach_kich_co %}
+                            <input class="choice-input"
+                                   type="radio"
+                                   name="kich_co"
+                                   id="size-{{ forloop.counter }}"
+                                   value="{{ kc }}"
+                                   {% if forloop.first %}checked{% endif %}>
+                            <label class="choice-label"
+                                   for="size-{{ forloop.counter }}">{{ kc }}</label>{% endfor %}</div>
+                </fieldset>
+                <fieldset class="option-group border-0 m-0 px-0">
+                    <legend class="option-label">Màu sắc</legend>
+                    <div class="choices">
+                        {% for ms in san_pham.danh_sach_mau_sac %}
+                            <input class="choice-input"
+                                   type="radio"
+                                   name="mau_sac"
+                                   id="color-{{ forloop.counter }}"
+                                   value="{{ ms }}"
+                                   {% if forloop.first %}checked{% endif %}>
+                            <label class="choice-label"
+                                   for="color-{{ forloop.counter }}">{{ ms }}</label>{% endfor %}</div>
+                </fieldset>
+                <div class="option-group">
+                    <label for="product-quantity" class="option-label">
+                        <span>Số lượng</span>
+                        <span>{% if san_pham.so_luong_kho %}Còn {{ san_pham.so_luong_kho }} sản phẩm{% else %}Tạm hết hàng{% endif %}</span>
+                    </label>
+                    <div class="quantity-control">
+                        <button type="button" data-quantity-step="-1" aria-label="Giảm số lượng">−</button>
+                        <input type="number"
+                               id="product-quantity"
+                               name="so_luong"
+                               min="1"
+                               max="{{ san_pham.so_luong_kho }}"
+                               value="1"
+                               required>
+                        <button type="button" data-quantity-step="1" aria-label="Tăng số lượng">+</button>
+                    </div>
+                </div>
+                <div class="purchase-actions">
+                    <button class="button secondary"
+                            type="submit"
+                            name="hanh_dong"
+                            value="them_gio"
+                            {% if not san_pham.so_luong_kho %}disabled{% endif %}>Thêm vào giỏ</button>
+                    <button class="button"
+                            type="submit"
+                            name="hanh_dong"
+                            value="mua_ngay"
+                            {% if not san_pham.so_luong_kho %}disabled{% endif %}>Mua ngay <span aria-hidden="true">↗</span>
+                    </button>
+                </div>
+            </form>
+            <div class="detail-extras">
+                <span>
+                    <i class="fa-solid fa-box" aria-hidden="true">
+                    </i>Đóng gói cẩn thận</span>
+                    <span>
+                        <i class="fa-solid fa-wallet" aria-hidden="true">
+                        </i>Thanh toán khi nhận hàng</span>
+                    </div>
+                    <details class="detail-accordion" open>
+                        <summary>Về món đồ này</summary>
+                        {{ san_pham.mo_ta|linebreaks }}
+                    </details>
+                    <details class="detail-accordion">
+                        <summary>Chọn size & bảo quản</summary>
+                        <p>Chọn kích thước thường mặc của bạn. Ưu tiên giặt nhẹ với đồ cùng màu và kiểm tra hướng dẫn trên nhãn sản phẩm trước khi giặt.</p>
+                    </details>
+                </div>
+            </section>
+            {% if san_pham_lien_quan %}
+                <section class="related-section">
+                    <span class="eyebrow">CÓ THỂ BẠN CŨNG THÍCH</span>
+                    <h2 class="section-heading">Thêm một chút đồng điệu.</h2>
+                    <div class="catalog-grid">
+                        {% for sp in san_pham_lien_quan %}
+                            {% include "cua_hang/_the_san_pham.html" %}
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+        </div>
+    {% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/product-gallery.js' %}"></script>
+{% endblock %}

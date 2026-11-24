@@ -1,0 +1,43 @@
+{% load static %}
+
+{% with bo_anh=san_pham.bo_anh %}
+    <div class="product-gallery" data-product-gallery>
+        <div class="gallery-main">
+            {% if bo_anh %}
+                <img class="detail-photo"
+                     src="{{ bo_anh.0.url }}"
+                     alt="{{ bo_anh.0.mo_ta }}"
+                     data-gallery-main
+                     width="600"
+                     height="750">
+            {% else %}
+                <img class="detail-photo"
+                     src="{% static 'images/product-placeholder.svg' %}"
+                     alt="Sản phẩm chưa có ảnh"
+                     width="600"
+                     height="750">
+            {% endif %}
+            {% if bo_anh|length > 1 %}
+                <span class="gallery-position" data-gallery-position aria-live="polite">
+                    1 / {{ bo_anh|length }}
+                </span>
+            {% endif %}
+        </div>
+        {% if bo_anh|length > 1 %}
+            <div class="gallery-thumbnails" role="group" aria-label="Chọn ảnh sản phẩm">
+                {% for anh in bo_anh %}
+                    <button type="button"
+                            class="gallery-thumbnail"
+                            data-gallery-thumbnail
+                            data-image-url="{{ anh.url }}"
+                            data-image-alt="{{ anh.mo_ta }}"
+                            data-image-number="{{ forloop.counter }}"
+                            aria-label="Xem ảnh {{ forloop.counter }}: {{ anh.mo_ta }}"
+                            aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}">
+                        <img src="{{ anh.url }}" alt="" width="72" height="90">
+                    </button>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endwith %}

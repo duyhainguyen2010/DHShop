@@ -1,0 +1,86 @@
+{% extends "bo_cuc_chung.html" %}
+
+{% block title %}Tạo tài khoản · DHShop{% endblock %}
+{% block content %}
+    <div class="site-width auth-layout">
+        {% include "khach_hang/_anh_tai_khoan.html" %}
+        <section class="auth-panel">
+            <span class="eyebrow">RẤT VUI ĐƯỢC GẶP BẠN</span>
+            <h1 class="serif">
+                Bắt đầu câu chuyện
+                <br>
+                phong cách của bạn.
+            </h1>
+            <p>Tạo tài khoản để lưu thông tin và xem lại những đơn hàng yêu thích.</p>
+            <form method="post" class="shop-form">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="register-name">Họ và tên</label>
+                        <input id="register-name"
+                               name="ho_ten"
+                               value="{{ du_lieu.ho_ten|default:'' }}"
+                               autocomplete="name"
+                               maxlength="150">
+                    </div>
+                    <div class="field">
+                        <label for="register-phone">Số điện thoại</label>
+                        <input type="tel"
+                               id="register-phone"
+                               name="so_dien_thoai"
+                               value="{{ du_lieu.so_dien_thoai|default:'' }}"
+                               autocomplete="tel"
+                               maxlength="20">
+                    </div>
+                    <div class="field">
+                        <label for="register-email">Email <span aria-hidden="true">*</span></label>
+                        <input type="email"
+                               id="register-email"
+                               name="email"
+                               value="{{ du_lieu.email|default:'' }}"
+                               autocomplete="email"
+                               required
+                               maxlength="254">
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="register-address">Địa chỉ nhận hàng</label>
+                    <input id="register-address"
+                           name="dia_chi"
+                           value="{{ du_lieu.dia_chi|default:'' }}"
+                           autocomplete="street-address">
+                </div>
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="register-password">
+                            Mật khẩu <span aria-hidden="true">*</span>
+                        </label>
+                        <input type="password"
+                               id="register-password"
+                               name="mat_khau"
+                               autocomplete="new-password"
+                               required
+                               minlength="8"
+                               placeholder="Tối thiểu 8 ký tự">
+                    </div>
+                    <div class="field">
+                        <label for="register-confirm">
+                            Nhập lại mật khẩu <span aria-hidden="true">*</span>
+                        </label>
+                        <input type="password"
+                               id="register-confirm"
+                               name="xac_nhan_mat_khau"
+                               autocomplete="new-password"
+                               required
+                               minlength="8">
+                    </div>
+                </div>
+                <button type="submit" class="button">
+                    Tạo tài khoản <span aria-hidden="true">↗</span>
+                </button>
+            </form>
+            <div class="form-note">Đã có tài khoản? <a href="{% url 'khach_hang:dang_nhap' %}">Đăng nhập</a>
+            </div>
+        </section>
+    </div>
+{% endblock %}

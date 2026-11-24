@@ -1,0 +1,49 @@
+{% extends "bo_cuc_chung.html" %}
+
+{% load tien_te %}
+
+{% block title %}Đơn hàng của tôi · DHShop{% endblock %}
+{% block content %}
+    <div class="site-width">
+        <header class="page-intro">
+            <span class="eyebrow">NHỮNG LẦN GHÉ DHSHOP</span>
+            <h1 class="serif">Đơn hàng của bạn.</h1>
+            <p>{{ tong_so_don }} đơn hàng · Xem chi tiết và theo dõi trạng thái xử lý.</p>
+        </header>
+        <section class="order-history" aria-label="Danh sách đơn hàng">
+            {% for dh in cac_don_hang %}
+                <article class="history-item">
+                    <header class="history-heading">
+                        <div>
+                            <span class="eyebrow">ĐƠN HÀNG #{{ dh.id }}</span>
+                            <p>{{ dh.ngay_tao|date:'d/m/Y · H:i' }}</p>
+                        </div>
+                        <span class="order-status">{{ dh.get_trang_thai_display }}</span>
+                    </header>
+                    {% for item in dh.danh_sach_san_pham_dat.all %}
+                        <div class="history-product">
+                            <span>{{ item.ten_san_pham }}<small>Size {{ item.kich_co }} / {{ item.mau_sac }} · {{ item.so_luong }} món</small>
+                            </span>
+                            <span>{{ item.tinh_thanh_tien|vnd }}₫</span>
+                        </div>
+                    {% endfor %}
+                    <footer class="history-total">
+                        <span>Tổng cộng <strong>{{ dh.tong_tien|vnd }}₫</strong>
+                        </span>
+                        <a class="text-link"
+                           href="{% url 'khach_hang:chi_tiet_hoa_don' dh.id %}">Chi tiết đơn hàng <span aria-hidden="true">↗</span>
+                        </a>
+                    </footer>
+                </article>
+            {% empty %}
+                <div class="empty-state">
+                    <h2 class="serif">Câu chuyện mua sắm vẫn đang chờ bạn.</h2>
+                    <p>Những đơn hàng bạn đặt sẽ xuất hiện tại đây.</p>
+                    <a class="button"
+                       href="{% url 'cua_hang:trang_chu' %}#khu-vuc-san-pham">Khám phá sản phẩm <span aria-hidden="true">↗</span>
+                    </a>
+                </div>
+            {% endfor %}
+        </section>
+    </div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% load static tien_te %}
+
+<article class="catalog-card">
+    <div class="catalog-image">
+        {% if sp.phan_tram_giam_gia > 0 %}<span class="sale-tag">-{{ sp.phan_tram_giam_gia }}%</span>{% endif %}
+        <a href="{{ sp.get_absolute_url }}" aria-label="Xem {{ sp.ten_san_pham }}">
+            {% if sp.anh_dai_dien %}
+                <img src="{{ sp.anh_dai_dien.url }}"
+                     alt="{{ sp.ten_san_pham }}"
+                     loading="lazy"
+                     width="400"
+                     height="500">
+            {% else %}
+                <img src="{% static 'images/product-placeholder.svg' %}"
+                     alt="{{ sp.ten_san_pham }} — chưa có ảnh"
+                     loading="lazy"
+                     width="400"
+                     height="500">
+            {% endif %}
+        </a>
+        <form action="{% url 'gio_hang:them_vao_gio' sp.id %}"
+              method="post"
+              class="quick-add js-add-to-cart">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}#khu-vuc-san-pham">
+            <input type="hidden" name="so_luong" value="1">
+            <input type="hidden" name="kich_co" value="{{ sp.danh_sach_kich_co.0 }}">
+            <input type="hidden" name="mau_sac" value="{{ sp.danh_sach_mau_sac.0 }}">
+            <button type="submit"
+                    {% if not sp.so_luong_kho %}disabled{% endif %}
+                    aria-label="Thêm {{ sp.ten_san_pham }} vào giỏ, size {{ sp.danh_sach_kich_co.0 }}, màu {{ sp.danh_sach_mau_sac.0 }}"
+                    title="Thêm size {{ sp.danh_sach_kich_co.0 }}, màu {{ sp.danh_sach_mau_sac.0 }}">
+                <i class="fa-solid fa-plus" aria-hidden="true">
+                </i>
+            </button>
+        </form>
+    </div>
+    <div class="catalog-info">
+        <span class="eyebrow">{{ sp.danh_muc.ten_danh_muc }}</span>
+        <h3>
+            <a href="{{ sp.get_absolute_url }}">{{ sp.ten_san_pham }}</a>
+        </h3>
+        <span class="stock-text">{% if sp.so_luong_kho %}Còn hàng{% else %}Hết hàng{% endif %}</span>
+        <div class="catalog-price">
+            <span>{{ sp.gia_ban|vnd }}₫</span>{% if sp.phan_tram_giam_gia > 0 %}<del>{{ sp.gia_goc|vnd }}₫</del>{% endif %}</div>
+    </div>
+</article>

@@ -1,0 +1,56 @@
+[
+  {
+    "file": "media/dhshop/campaign.jpg",
+    "source": "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=85",
+    "description": "Ảnh phong cách sống, dùng cho bộ sưu tập",
+    "usage": "Ảnh minh họa cho đồ án, thay bằng ảnh thực tế khi kinh doanh."
+  },
+  {
+    "file": "media/dhshop/linen-shirt.jpg",
+    "source": "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=1200&q=85",
+    "description": "Áo sơ mi",
+    "usage": "Ảnh minh họa cho đồ án, thay bằng ảnh thực tế khi kinh doanh."
+  },
+  {
+    "file": "media/dhshop/cotton-tee.jpg",
+    "source": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=85",
+    "description": "Áo thun trắng",
+    "usage": "Ảnh minh họa cho đồ án, thay bằng ảnh thực tế khi kinh doanh."
+  },
+  {
+    "file": "media/dhshop/polo.jpg",
+    "source": "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?auto=format&fit=crop&w=1200&q=85",
+    "description": "Áo polo",
+    "usage": "Ảnh minh họa cho đồ án, thay bằng ảnh thực tế khi kinh doanh."
+  },
+  {
+    "file": "media/dhshop/trousers.jpg",
+    "source": "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=1200&q=85",
+    "description": "Quần dài",
+    "usage": "Ảnh minh họa cho đồ án, thay bằng ảnh thực tế khi kinh doanh."
+  },
+  {
+    "file": "media/dhshop/denim.jpg",
+    "source": "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=1200&q=85",
+    "description": "Quần denim",
+    "usage": "Ảnh minh họa cho đồ án, thay bằng ảnh thực tế khi kinh doanh."
+  },
+  {
+    "file": "media/dhshop/tailored.jpg",
+    "source": "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1200&q=85",
+    "description": "Quần nữ",
+    "usage": "Ảnh minh họa cho đồ án, thay bằng ảnh thực tế khi kinh doanh."
+  },
+  {
+    "file": "media/dhshop/dress.jpg",
+    "source": "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=1200&q=85",
+    "description": "Váy",
+    "usage": "Ảnh minh họa cho đồ án, thay bằng ảnh thực tế khi kinh doanh."
+  },
+  {
+    "file": "media/dhshop/knitwear.jpg",
+    "source": "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=1200&q=85",
+    "description": "Áo dệt kim",
+    "usage": "Ảnh minh họa cho đồ án, thay bằng ảnh thực tế khi kinh doanh."
+  }
+]

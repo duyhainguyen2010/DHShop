@@ -1,0 +1,50 @@
+{% extends "bo_cuc_chung.html" %}
+
+{% block title %}Liên hệ · DHShop{% endblock %}
+{% block content %}
+    <div class="site-width">
+        <header class="page-intro">
+            <span class="eyebrow">CHÚNG MÌNH LUÔN SẴN SÀNG LẮNG NGHE</span>
+            <h1 class="serif">Cần một chút hỗ trợ?</h1>
+            <p>Về sản phẩm, cách chọn size hay những đơn hàng của bạn.</p>
+        </header>
+        <div class="contact-grid">
+            <div>
+                <section class="contact-block">
+                    <h2>DHShop · Đà Nẵng, Việt Nam</h2>
+                    <p>Những lựa chọn thời trang nhẹ nhàng cho tủ đồ thường ngày.</p>
+                </section>
+                <section class="contact-block">
+                    <h2>Email liên hệ</h2>
+                    <p>contact@dhshop.example</p>
+                </section>
+                <section class="contact-block">
+                    <h2>Về đơn hàng của bạn</h2>
+                    <p>Bạn có thể xem mã đơn, sản phẩm và tình trạng xử lý trong tài khoản. Hãy chuẩn bị mã đơn khi cần hỗ trợ.</p>
+                    <a class="text-link"
+                       href="{% url 'khach_hang:lich_su_don_hang' %}">Xem đơn hàng <span aria-hidden="true">↗</span>
+                    </a>
+                </section>
+            </div>
+            <section>
+                <h2 class="section-heading mb-4">Một vài điều hữu ích.</h2>
+                <details class="detail-accordion" open>
+                    <summary>DHShop nhận thanh toán như thế nào?</summary>
+                    <p>Hiện tại, bạn thanh toán khi nhận hàng (COD). Tổng tiền được hiển thị trước khi bạn xác nhận đơn.</p>
+                </details>
+                <details class="detail-accordion">
+                    <summary>Làm sao để chọn đúng kích thước?</summary>
+                    <p>Xem danh sách kích thước trong từng trang sản phẩm và chọn size bạn thường mặc. Các lựa chọn size thay đổi tùy theo món đồ.</p>
+                </details>
+                <details class="detail-accordion">
+                    <summary>Tôi theo dõi đơn hàng ở đâu?</summary>
+                    <p>Đăng nhập tài khoản, mở mục “Đơn hàng của tôi” để xem trạng thái và chi tiết từng đơn đã đặt.</p>
+                </details>
+                <details class="detail-accordion">
+                    <summary>Tôi cập nhật địa chỉ bằng cách nào?</summary>
+                    <p>Vào “Thông tin tài khoản” để lưu địa chỉ mặc định. Bạn vẫn có thể nhập địa chỉ nhận khác ở bước đặt hàng.</p>
+                </details>
+            </section>
+        </div>
+    </div>
+{% endblock %}

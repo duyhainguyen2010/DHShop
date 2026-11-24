@@ -1,0 +1,227 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#faf8f4">
+        <meta name="description"
+              content="DHShop — những lựa chọn thời trang đơn giản, thoải mái và thanh lịch cho mỗi ngày.">
+        <title>{% block title %}DHShop · Đẹp từ những điều giản đơn{% endblock %}</title>
+        <link rel="icon" href="{% static 'images/dhshop-mark.svg' %}" type="image/svg+xml">
+        <link rel="stylesheet" href="{% static 'vendor/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
+        <link rel="stylesheet" href="{% static 'css/base.css' %}">
+        <link rel="stylesheet" href="{% static 'css/cua-hang.css' %}">
+        <link rel="stylesheet" href="{% static 'css/tai-khoan-va-gio-hang.css' %}">
+        <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+        {% block extra_css %}{% endblock %}
+    </head>
+    <body>
+        <div class="announcement">
+            ĐẸP TỪ NHỮNG ĐIỀU GIẢN ĐƠN <span>—</span> DHSHOP<span class="announcement-extra"> / EVERYDAY ESSENTIALS</span>
+        </div>
+        <header class="site-header">
+            <div class="site-width header-row">
+                <a class="wordmark"
+                   href="{% url 'cua_hang:trang_chu' %}"
+                   aria-label="DHShop — Trang chủ">DH<em>Shop</em>
+                    <span aria-hidden="true">.</span>
+                </a>
+                <nav class="desktop-nav" aria-label="Điều hướng chính">
+                    <a href="{% url 'cua_hang:trang_chu' %}"
+                       {% if request.resolver_match.url_name == 'trang_chu' %}class="active" aria-current="page"{% endif %}>Trang chủ</a>
+                    <div class="nav-dropdown">
+                        <button type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Sản phẩm <i class="fa-solid fa-chevron-down"
+                                        style="font-size:8px;
+                                               margin-left:4px"
+                                        aria-hidden="true">
+                            </i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item"
+                                   href="{% url 'cua_hang:trang_chu' %}#khu-vuc-san-pham">Tất cả sản phẩm</a>
+                            </li>
+                            {% for dm in cac_danh_muc %}
+                                <li>
+                                    <a class="dropdown-item"
+                                       href="{{ dm.get_absolute_url }}">{{ dm.ten_danh_muc }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <a href="{% url 'cua_hang:gioi_thieu' %}">Câu chuyện DHShop</a>
+                    <a href="{% url 'cua_hang:lien_he' %}">Liên hệ</a>
+                </nav>
+                <div class="header-actions">
+                    <button type="button"
+                            class="icon-button"
+                            id="search-toggle"
+                            aria-label="Mở tìm kiếm"
+                            aria-controls="search-panel"
+                            aria-expanded="false">
+                        <i class="fa-solid fa-magnifying-glass" aria-hidden="true">
+                        </i>
+                    </button>
+                    {% if user.is_authenticated %}
+                        <div class="nav-dropdown">
+                            <button type="button"
+                                    class="icon-button"
+                                    data-bs-toggle="dropdown"
+                                    aria-label="Tài khoản của tôi"
+                                    aria-expanded="false">
+                                <i class="fa-regular fa-user" aria-hidden="true">
+                                </i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <span class="dropdown-item-text small">Chào {{ user.first_name|default:user.email }}</span>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item"
+                                       href="{% url 'khach_hang:lich_su_don_hang' %}">Đơn hàng của tôi</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item"
+                                       href="{% url 'khach_hang:thong_tin_tai_khoan' %}">Thông tin tài khoản</a>
+                                </li>
+                                {% if user.is_staff %}
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="{% url 'admin:index' %}">Quản trị cửa hàng</a>
+                                    </li>
+                                {% endif %}
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <form method="post" action="{% url 'khach_hang:dang_xuat' %}">{% csrf_token %}<button type="submit" class="dropdown-item">Đăng xuất</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a class="icon-link"
+                           href="{% url 'khach_hang:dang_nhap' %}"
+                           aria-label="Đăng nhập">
+                            <i class="fa-regular fa-user" aria-hidden="true">
+                            </i>
+                        </a>
+                    {% endif %}
+                    <a class="icon-link"
+                       href="{% url 'gio_hang:xem_gio_hang' %}"
+                       aria-label="Xem giỏ hàng">
+                        <i class="fa-solid fa-bag-shopping" aria-hidden="true">
+                        </i>
+                        <span class="cart-count badge-cart">{{ so_luong_gio_hang|default:'0' }}</span>
+                    </a>
+                    <button class="icon-button menu-toggle"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#mobile-menu"
+                            aria-controls="mobile-menu"
+                            aria-expanded="false"
+                            aria-label="Mở menu">
+                        <i class="fa-solid fa-bars" aria-hidden="true">
+                        </i>
+                    </button>
+                </div>
+            </div>
+            <nav id="mobile-menu"
+                 class="site-width mobile-nav collapse"
+                 aria-label="Điều hướng điện thoại">
+                <a href="{% url 'cua_hang:trang_chu' %}">Trang chủ</a>
+                <a href="{% url 'cua_hang:trang_chu' %}#khu-vuc-san-pham">Tất cả sản phẩm</a>
+                {% for dm in cac_danh_muc %}<a href="{{ dm.get_absolute_url }}">{{ dm.ten_danh_muc }}</a>{% endfor %}
+                <a href="{% url 'cua_hang:gioi_thieu' %}">Câu chuyện DHShop</a>
+                <a href="{% url 'cua_hang:lien_he' %}">Liên hệ</a>
+            </nav>
+            <div id="search-panel" class="search-panel" hidden>
+                <form class="site-width"
+                      method="get"
+                      action="{% url 'cua_hang:trang_chu' %}#khu-vuc-san-pham"
+                      role="search">
+                    <label for="site-search" class="visually-hidden">Tìm sản phẩm</label>
+                    <input id="site-search"
+                           type="search"
+                           name="q"
+                           placeholder="Bạn đang tìm món đồ nào?"
+                           value="{{ tu_khoa|default:'' }}"
+                           maxlength="150">
+                    <button type="submit">
+                        Tìm kiếm <i class="fa-solid fa-arrow-right ms-2" aria-hidden="true">
+                        </i>
+                    </button>
+                </form>
+            </div>
+        </header>
+        {% if messages %}
+            <div class="site-width site-messages" aria-live="polite">
+                {% for message in messages %}<div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show"
+                                                  role="alert">{{ message }}<button type="button"
+                                                                                    class="btn-close"
+                                                                                    data-bs-dismiss="alert"
+                                                                                    aria-label="Đóng thông báo">
+                    </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <main id="main-content">
+            {% block content %}{% endblock %}
+        </main>
+        {% block footer %}
+            <footer class="site-footer">
+                <div class="site-width footer-grid">
+                    <div class="footer-brand">
+                        <a class="wordmark" href="{% url 'cua_hang:trang_chu' %}">DH<em>Shop</em>.</a>
+                        <p>
+                            Một tủ đồ ít cầu kỳ, nhiều cảm hứng.
+                            <br>
+                            Cùng bạn mặc đẹp theo cách tự nhiên nhất.
+                        </p>
+                    </div>
+                    <div>
+                        <h2 class="footer-title">Khám phá</h2>
+                        <div class="footer-links">
+                            <a href="{% url 'cua_hang:trang_chu' %}#khu-vuc-san-pham">Bộ sưu tập</a>
+                            <a href="{% url 'cua_hang:gioi_thieu' %}">Câu chuyện thương hiệu</a>
+                            <a href="{% url 'cua_hang:lien_he' %}">Liên hệ DHShop</a>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="footer-title">Mua sắm cùng DHShop</h2>
+                        <div class="footer-links">
+                            <a href="{% url 'khach_hang:lich_su_don_hang' %}">Theo dõi đơn hàng</a>
+                            <a href="{% url 'khach_hang:thong_tin_tai_khoan' %}">Tài khoản của bạn</a>
+                            <span>Thanh toán khi nhận hàng</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="site-width footer-bottom">
+                    <span>© {% now "Y" %} DHShop. Đẹp từ những điều giản đơn.</span>
+                    <span>Đà Nẵng, Việt Nam</span>
+                </div>
+            </footer>
+        {% endblock %}
+        <div class="toast-container position-fixed bottom-0 end-0 p-3"
+             aria-live="polite"
+             aria-atomic="true">
+            <div id="cart-toast" class="toast text-bg-success border-0" role="status">
+                <div class="d-flex">
+                    <div class="toast-body"></div>
+                    <button type="button"
+                            class="btn-close btn-close-white me-2 m-auto"
+                            data-bs-dismiss="toast"
+                            aria-label="Đóng"></button>
+                </div>
+            </div>
+        </div>
+        <script src="{% static 'vendor/bootstrap.bundle.min.js' %}"></script>
+        <script src="{% static 'js/dhshop.js' %}"></script>
+        {% block extra_js %}{% endblock %}
+    </body>
+</html>

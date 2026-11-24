@@ -1,0 +1,367 @@
+from datetime import datetime, time
+from django.contrib import admin, messages
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.http import HttpResponseRedirect
+from django.utils.html import format_html, format_html_join
+from cua_hang.formatters import format_vnd
+from django.db.models import Count, Sum
+from django.template.response import TemplateResponse
+from django.urls import path, reverse
+from django.utils import timezone
+from .models import DonHang, ChiTietDonHang
+
+
+class ChiTietDonHangInline(admin.TabularInline):
+    model = ChiTietDonHang
+    extra = 0
+    can_delete = False
+    fields = [
+        "hinh_anh_sp",
+        "ten_san_pham",
+        "kich_co",
+        "mau_sac",
+        "don_gia_vnd",
+        "so_luong",
+        "thanh_tien_vnd",
+    ]
+    readonly_fields = [
+        "hinh_anh_sp",
+        "ten_san_pham",
+        "kich_co",
+        "mau_sac",
+        "don_gia_vnd",
+        "so_luong",
+        "thanh_tien_vnd",
+    ]
+
+    def has_add_permission(self, request, obj=None):
+        """Tắt nút 'Thêm vào đơn hàng' để tránh phát sinh dòng trống lỗi khi quản lý đơn đã đặt"""
+        return False
+
+    def hinh_anh_sp(self, obj):
+        if obj and obj.san_pham and obj.san_pham.hinh_anh:
+            return format_html(
+                '<img src="{}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;" />',
+                obj.san_pham.hinh_anh.url,
+            )
+        return format_html('<span style="color: #999;">{}</span>', "Không có ảnh")
+
+    hinh_anh_sp.short_description = "Ảnh"
+
+    def don_gia_vnd(self, obj):
+        if obj and obj.don_gia is not None:
+            return f"{format_vnd(obj.don_gia)}₫"
+        return "0₫"
+
+    don_gia_vnd.short_description = "Đơn giá"
+
+    def thanh_tien_vnd(self, obj):
+        if obj and obj.id:
+            tien_str = f"{format_vnd(obj.tinh_thanh_tien())}₫"
+            return format_html('<strong style="color: #dc3545;">{}</strong>', tien_str)
+        return "0₫"
+
+    thanh_tien_vnd.short_description = "Thành tiền"
+
+
+@admin.register(DonHang)
+class DonHangAdmin(admin.ModelAdmin):
+    change_list_template = "admin/gio_hang/donhang/change_list.html"
+
+    list_display = [
+        "ma_don_hang",
+        "thong_tin_khach",
+        "danh_sach_san_pham_dat_mua",
+        "tong_so_luong",
+        "tong_tien_vnd",
+        "trang_thai",  # Trường gốc để chỉnh sửa dropdown trực tiếp trên bảng
+        "ngay_tao_dinh_dang",
+        "xem_hoa_don",  # Biểu tượng con mắt 👁️ xem phiếu hóa đơn chuẩn đẹp
+    ]
+    list_editable = ["trang_thai"]  # Cho phép Admin đổi trực tiếp trạng thái ngay trên danh sách
+    list_filter = ["trang_thai", "ngay_tao"]
+    search_fields = [
+        "id",
+        "ten_khach_hang",
+        "so_dien_thoai",
+        "email",
+        "dia_chi_giao_hang",
+        "danh_sach_san_pham_dat__ten_san_pham",
+    ]
+    readonly_fields = ["khach_hang", "tong_tien", "ngay_tao", "tong_tien_vnd", "xem_hoa_don"]
+    list_per_page = 20
+
+    fieldsets = [
+        (
+            "1. Thông tin Khách Hàng & Tài Khoản",
+            {"fields": ["khach_hang", "ten_khach_hang", "so_dien_thoai", "email"]},
+        ),
+        (
+            "2. Địa Chỉ Giao Hàng & Ghi Chú",
+            {"fields": ["dia_chi_giao_hang", "ghi_chu", "ngay_tao"]},
+        ),
+        (
+            "3. Thanh Toán & Trạng Thái Đơn Hàng",
+            {"fields": ["trang_thai", "tong_tien", "tong_tien_vnd", "xem_hoa_don"]},
+        ),
+    ]
+    inlines = [ChiTietDonHangInline]
+
+    def has_add_permission(self, request):
+        # Đơn phải đi qua checkout để có chi tiết, tổng tiền và trừ kho đúng.
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        # Giữ lịch sử hóa đơn; dùng trạng thái hủy để trả kho.
+        return False
+
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+        try:
+            return super().changeform_view(request, object_id, form_url, extra_context)
+        except ValidationError as error:
+            # Có thể xảy ra nếu quản trị khác vừa thay trạng thái trong lúc đang mở form.
+            messages.error(request, " ".join(error.messages))
+            return HttpResponseRedirect(request.get_full_path())
+
+    def changelist_view(self, request, extra_context=None):
+        try:
+            return super().changelist_view(request, extra_context)
+        except ValidationError as error:
+            messages.error(request, " ".join(error.messages))
+            return HttpResponseRedirect(request.get_full_path())
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("khach_hang")
+            .prefetch_related("danh_sach_san_pham_dat__san_pham__anh_bo_sung")
+        )
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "thong-ke-doanh-thu/",
+                self.admin_site.admin_view(self.thong_ke_doanh_thu),
+                name="gio_hang_donhang_revenue",
+            ),
+        ]
+        return custom_urls + urls
+
+    def thong_ke_doanh_thu(self, request):
+        if not self.has_view_permission(request):
+            raise PermissionDenied
+        don_hang_hop_le = DonHang.objects.exclude(trang_thai="da_huy")
+        thang_hien_tai = timezone.localdate().replace(day=1)
+        thang_bat_dau = thang_hien_tai
+        for _ in range(11):
+            if thang_bat_dau.month == 1:
+                thang_bat_dau = thang_bat_dau.replace(
+                    year=thang_bat_dau.year - 1,
+                    month=12,
+                )
+            else:
+                thang_bat_dau = thang_bat_dau.replace(
+                    month=thang_bat_dau.month - 1,
+                )
+
+        cac_thang = []
+        thang = thang_bat_dau
+        while thang <= thang_hien_tai:
+            if thang.month == 12:
+                thang_tiep_theo = thang.replace(year=thang.year + 1, month=1)
+            else:
+                thang_tiep_theo = thang.replace(month=thang.month + 1)
+
+            thong_ke = don_hang_hop_le.filter(
+                ngay_tao__gte=timezone.make_aware(
+                    datetime.combine(thang, time.min),
+                ),
+                ngay_tao__lt=timezone.make_aware(
+                    datetime.combine(thang_tiep_theo, time.min),
+                ),
+            ).aggregate(
+                doanh_thu=Sum("tong_tien"),
+                so_don=Count("id"),
+            )
+            cac_thang.append(
+                {
+                    "thang": thang,
+                    "doanh_thu": thong_ke.get("doanh_thu") or 0,
+                    "so_don": thong_ke.get("so_don", 0),
+                }
+            )
+            thang = thang_tiep_theo
+
+        context = {
+            **self.admin_site.each_context(request),
+            "title": "Thống kê doanh thu đơn hàng",
+            "tong_doanh_thu": don_hang_hop_le.aggregate(
+                tong=Sum("tong_tien"),
+            )["tong"]
+            or 0,
+            "doanh_thu_hoan_thanh": DonHang.objects.filter(
+                trang_thai="hoan_thanh",
+            ).aggregate(
+                tong=Sum("tong_tien")
+            )["tong"]
+            or 0,
+            "so_don_hop_le": don_hang_hop_le.count(),
+            "so_don_da_huy": DonHang.objects.filter(
+                trang_thai="da_huy",
+            ).count(),
+            "cac_thang": cac_thang,
+            "opts": self.model._meta,
+        }
+        return TemplateResponse(
+            request,
+            "admin/gio_hang/donhang/thong_ke_doanh_thu.html",
+            context,
+        )
+
+    def ma_don_hang(self, obj):
+        return format_html("<strong>#HD{}</strong>", obj.id)
+
+    ma_don_hang.short_description = "Mã đơn"
+
+    def thong_tin_khach(self, obj):
+        tai_khoan = f" (TK: {obj.khach_hang.username})" if obj.khach_hang else " (Khách vãng lai)"
+        return format_html(
+            '<div><strong>{}</strong>{}</div><div style="font-size: 12px; color: #666;"><i class="fa fa-phone"></i> {}</div>',
+            obj.ten_khach_hang,
+            tai_khoan,
+            obj.so_dien_thoai,
+        )
+
+    thong_tin_khach.short_description = "Khách hàng"
+
+    def danh_sach_san_pham_dat_mua(self, obj):
+        """Hiển thị danh sách tất cả các sản phẩm có trong đơn hàng ra bảng danh sách"""
+        items = obj.danh_sach_san_pham_dat.all()
+        if not items:
+            return format_html('<span style="color: #999;">{}</span>', "Trống")
+
+        return format_html_join(
+            "",
+            "<div>• <strong>{}</strong> <span>Size: {}</span> <strong>x{}</strong></div>",
+            ((item.ten_san_pham, item.kich_co, item.so_luong) for item in items),
+        )
+
+    danh_sach_san_pham_dat_mua.short_description = "Sản phẩm đặt mua (Chi tiết)"
+
+    def tong_so_luong(self, obj):
+        tong_sl = sum(item.so_luong for item in obj.danh_sach_san_pham_dat.all())
+        return format_html(
+            '<span style="font-weight: bold; font-size: 13px;">{} món</span>', tong_sl
+        )
+
+    tong_so_luong.short_description = "Tổng món"
+
+    def tong_tien_vnd(self, obj):
+        if obj and obj.tong_tien is not None:
+            tien_str = f"{format_vnd(obj.tong_tien)}₫"
+            return format_html(
+                '<strong style="color: #dc3545; font-size: 14px;">{}</strong>', tien_str
+            )
+        return "0₫"
+
+    tong_tien_vnd.short_description = "Tổng tiền"
+
+    def ngay_tao_dinh_dang(self, obj):
+        return timezone.localtime(obj.ngay_tao).strftime("%d/%m/%Y %H:%M")
+
+    ngay_tao_dinh_dang.short_description = "Thời gian đặt"
+
+    def xem_hoa_don(self, obj):
+        """Biểu tượng con mắt xem và in phiếu hóa đơn bán lẻ chuyên nghiệp"""
+        url = reverse("gio_hang:in_hoa_don", args=[obj.id])
+        return format_html(
+            '<a href="{}" target="_blank" title="Xem & in phiếu hóa đơn" style="text-decoration: none; font-size: 20px; display: inline-block; cursor: pointer;">'
+            "👁️"
+            "</a>",
+            url,
+        )
+
+    xem_hoa_don.short_description = "Hóa đơn"
+
+
+@admin.register(ChiTietDonHang)
+class ChiTietDonHangAdmin(admin.ModelAdmin):
+    """Mục quản lý chi tiết từng món đồ đã bán theo sản phẩm"""
+
+    list_display = [
+        "id",
+        "hinh_anh_sp",
+        "ten_san_pham",
+        "lien_ket_don_hang",
+        "kich_co",
+        "mau_sac",
+        "don_gia_vnd",
+        "so_luong",
+        "thanh_tien_vnd",
+        "ngay_dat_hang",
+    ]
+    list_filter = ["kich_co", "don_hang__trang_thai", "don_hang__ngay_tao"]
+    search_fields = [
+        "ten_san_pham",
+        "don_hang__id",
+        "don_hang__ten_khach_hang",
+        "don_hang__so_dien_thoai",
+    ]
+    readonly_fields = [
+        "don_hang",
+        "san_pham",
+        "ten_san_pham",
+        "don_gia",
+        "so_luong",
+        "kich_co",
+        "mau_sac",
+    ]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def hinh_anh_sp(self, obj):
+        if obj and obj.san_pham and obj.san_pham.hinh_anh:
+            return format_html(
+                '<img src="{}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;" />',
+                obj.san_pham.hinh_anh.url,
+            )
+        return format_html('<span style="color: #999;">{}</span>', "Không có ảnh")
+
+    hinh_anh_sp.short_description = "Ảnh"
+
+    def lien_ket_don_hang(self, obj):
+        url = reverse("admin:gio_hang_donhang_change", args=[obj.don_hang.id])
+        return format_html(
+            '<a href="{}" style="font-weight: bold;">Đơn #HD{} ({})</a>',
+            url,
+            obj.don_hang.id,
+            obj.don_hang.ten_khach_hang,
+        )
+
+    lien_ket_don_hang.short_description = "Đơn hàng"
+
+    def don_gia_vnd(self, obj):
+        if obj and obj.don_gia is not None:
+            return f"{format_vnd(obj.don_gia)}₫"
+        return "0₫"
+
+    don_gia_vnd.short_description = "Đơn giá"
+
+    def thanh_tien_vnd(self, obj):
+        if obj and obj.id:
+            tien_str = f"{format_vnd(obj.tinh_thanh_tien())}₫"
+            return format_html('<strong style="color: #dc3545;">{}</strong>', tien_str)
+        return "0₫"
+
+    thanh_tien_vnd.short_description = "Thành tiền"
+
+    def ngay_dat_hang(self, obj):
+        return timezone.localtime(obj.don_hang.ngay_tao).strftime("%d/%m/%Y %H:%M")
+
+    ngay_dat_hang.short_description = "Ngày đặt"

@@ -1,0 +1,26 @@
+{% extends "bo_cuc_chung.html" %}
+
+{% block title %}Câu chuyện DHShop{% endblock %}
+{% block content %}
+    <div class="site-width">
+        <article class="story-page">
+            <span class="eyebrow">CHÀO BẠN, CHÚNG MÌNH LÀ DHSHOP</span>
+            <h1 class="serif">
+                Một tủ đồ giản đơn.
+                <br>
+                Một phong cách của riêng bạn.
+            </h1>
+            <p class="lead">DHShop tin rằng mặc đẹp có thể bắt đầu từ những điều rất nhỏ: một chiếc áo vừa vặn, một sắc màu dịu mắt, một cảm giác thoải mái.</p>
+            <img src="/media/dhshop/knitwear.jpg"
+                 alt="Áo choàng dệt kim màu kem với chất liệu mộc mạc"
+                 width="800"
+                 height="450">
+            <h2 class="serif">Ít cầu kỳ hơn, nhiều cảm hứng hơn.</h2>
+            <p>Chúng mình chọn những món đồ dễ mặc và dễ kết hợp cho nhịp sống thường ngày. Từ buổi đến lớp, những ngày làm việc cho đến một chiều dạo phố, bạn luôn có thể tìm thấy một lựa chọn gần gũi với mình.</p>
+            <p>Không chạy theo một khuôn mẫu duy nhất, DHShop dành chỗ cho cách bạn phối màu, chọn phom và kể câu chuyện của riêng mình. Đơn giản, nhẹ nhàng và tự nhiên — đó là tinh thần chúng mình muốn mang đến.</p>
+            <a class="text-link mt-3"
+               href="{% url 'cua_hang:trang_chu' %}#khu-vuc-san-pham">Tìm một món đồ dành cho bạn <span aria-hidden="true">↗</span>
+            </a>
+        </article>
+    </div>
+{% endblock %}

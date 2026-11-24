@@ -1,0 +1,46 @@
+{% extends "bo_cuc_chung.html" %}
+
+{% block title %}Đăng nhập · DHShop{% endblock %}
+{% block content %}
+    <div class="site-width auth-layout">
+        {% include "khach_hang/_anh_tai_khoan.html" %}
+        <section class="auth-panel">
+            <span class="eyebrow">CHÀO BẠN TRỞ LẠI</span>
+            <h1 class="serif">
+                Một lần ghé,
+                <br>
+                thêm chút cảm hứng.
+            </h1>
+            <p>Đăng nhập để tiếp tục mua sắm và theo dõi những món đồ bạn đã chọn.</p>
+            <form method="post" class="shop-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next|default:'' }}">
+                <div class="field">
+                    <label for="login-email">Email</label>
+                    <input type="email"
+                           id="login-email"
+                           name="email"
+                           value="{{ email|default:'' }}"
+                           autocomplete="username"
+                           required
+                           maxlength="254"
+                           placeholder="Email của bạn">
+                </div>
+                <div class="field">
+                    <label for="login-password">Mật khẩu</label>
+                    <input type="password"
+                           id="login-password"
+                           name="mat_khau"
+                           autocomplete="current-password"
+                           required
+                           placeholder="Nhập mật khẩu">
+                </div>
+                <button type="submit" class="button">
+                    Đăng nhập <span aria-hidden="true">↗</span>
+                </button>
+            </form>
+            <div class="form-note">Lần đầu ghé DHShop? <a href="{% url 'khach_hang:dang_ky' %}">Tạo tài khoản</a>
+            </div>
+        </section>
+    </div>
+{% endblock %}

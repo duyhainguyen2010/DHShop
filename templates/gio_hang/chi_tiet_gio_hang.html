@@ -1,0 +1,107 @@
+{% extends "bo_cuc_chung.html" %}
+
+{% load static tien_te %}
+
+{% block title %}Giỏ hàng của bạn · DHShop{% endblock %}
+{% block content %}
+    <div class="site-width">
+        <header class="page-intro">
+            <span class="eyebrow">NHỮNG MÓN ĐỒ BẠN ĐÃ CHỌN</span>
+            <h1 class="serif">Giỏ hàng của bạn.</h1>
+            <p>{{ gio_hang|length }} sản phẩm · Một chút cảm hứng cho tủ đồ thường ngày.</p>
+        </header>
+        {% if gio_hang|length %}
+            <div class="shop-columns">
+                <section aria-label="Sản phẩm trong giỏ">
+                    {% for item in gio_hang %}
+                        <article class="cart-line">
+                            <a href="{{ item.san_pham.get_absolute_url }}">
+                                {% if item.san_pham.anh_dai_dien %}
+                                    <img src="{{ item.san_pham.anh_dai_dien.url }}"
+                                         alt="{{ item.san_pham.ten_san_pham }}"
+                                         width="95"
+                                         height="120">
+                                {% else %}
+                                    <img src="{% static 'images/product-placeholder.svg' %}"
+                                         alt="Sản phẩm chưa có ảnh"
+                                         width="95"
+                                         height="120">
+                                {% endif %}
+                            </a>
+                            <div>
+                                <h2>
+                                    <a href="{{ item.san_pham.get_absolute_url }}">{{ item.san_pham.ten_san_pham }}</a>
+                                </h2>
+                                <p>Size {{ item.kich_co }}{% if item.mau_sac %} / {{ item.mau_sac }}{% endif %}<br>{{ item.don_gia|vnd }}₫</p>
+                                <form action="{% url 'gio_hang:cap_nhat_so_luong' %}"
+                                      method="post"
+                                      data-auto-update>
+                                    {% csrf_token %}
+                                    <input type="hidden" name="khoa" value="{{ item.khoa }}">
+                                    <div class="quantity-control">
+                                        <button type="button"
+                                                data-quantity-step="-1"
+                                                aria-label="Giảm số lượng {{ item.san_pham.ten_san_pham }}">−</button>
+                                        <input type="number"
+                                               name="so_luong"
+                                               min="1"
+                                               max="999"
+                                               value="{{ item.so_luong }}"
+                                               aria-label="Số lượng {{ item.san_pham.ten_san_pham }}"
+                                               onchange="this.form.requestSubmit()">
+                                        <button type="button"
+                                                data-quantity-step="1"
+                                                aria-label="Tăng số lượng {{ item.san_pham.ten_san_pham }}">+</button>
+                                    </div>
+                                    <noscript>
+                                        <button type="submit">Cập nhật</button>
+                                    </noscript>
+                                </form>
+                            </div>
+                            <div class="cart-line-end">
+                                {{ item.thanh_tien|vnd }}₫
+                                <form action="{% url 'gio_hang:xoa_khoi_gio' item.khoa %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="remove-item"
+                                            aria-label="Bỏ {{ item.san_pham.ten_san_pham }} khỏi giỏ">Bỏ sản phẩm</button>
+                                </form>
+                            </div>
+                        </article>
+                    {% endfor %}
+                    <a class="text-link mt-4"
+                       href="{% url 'cua_hang:trang_chu' %}#khu-vuc-san-pham">Tiếp tục khám phá <span aria-hidden="true">↗</span>
+                    </a>
+                </section>
+                <aside class="order-summary">
+                    <h2>Tóm tắt đơn hàng</h2>
+                    <div class="summary-row">
+                        <span>Tạm tính</span>
+                        <span>{{ gio_hang.tong_tien|vnd }}₫</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Phí vận chuyển</span>
+                        <span>Miễn phí</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Tổng cộng</span>
+                        <strong>{{ gio_hang.tong_tien|vnd }}₫</strong>
+                    </div>
+                    <a class="button"
+                       href="{% url 'gio_hang:thanh_toan' %}">Tiến hành đặt hàng <span aria-hidden="true">↗</span>
+                    </a>
+                    <p class="summary-caption">Thanh toán khi nhận hàng · COD</p>
+                </aside>
+            </div>
+        {% else %}
+            <section class="empty-state mb-5">
+                <span class="eyebrow">CHỌN MỘT CHÚT CẢM HỨNG MỚI</span>
+                <h2 class="serif mt-3">Giỏ hàng đang chờ những món đồ bạn yêu.</h2>
+                <p>Ghé bộ sưu tập và tìm một lựa chọn dành riêng cho mình nhé.</p>
+                <a class="button mt-3"
+                   href="{% url 'cua_hang:trang_chu' %}#khu-vuc-san-pham">Khám phá sản phẩm <span aria-hidden="true">↗</span>
+                </a>
+            </section>
+        {% endif %}
+    </div>
+{% endblock %}

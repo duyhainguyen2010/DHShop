@@ -1,0 +1,123 @@
+{% extends "bo_cuc_chung.html" %}
+
+{% load static tien_te %}
+
+{% block title %}Thông tin đặt hàng · DHShop{% endblock %}
+{% block content %}
+    <div class="site-width">
+        <header class="page-intro">
+            <span class="eyebrow">CHỈ CÒN MỘT BƯỚC NHỎ</span>
+            <h1 class="serif">Sắp đến tay bạn.</h1>
+            <p>Điền thông tin để DHShop gửi những món đồ bạn đã chọn.</p>
+        </header>
+        <form method="post" class="shop-form shop-columns">
+            {% csrf_token %}
+            <div>
+                <section class="checkout-section">
+                    <h2>
+                        <span>01</span> Thông tin nhận hàng
+                    </h2>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="recipient-name">Họ và tên người nhận *</label>
+                            <input id="recipient-name"
+                                   name="ten_khach_hang"
+                                   value="{{ thong_tin.ten_khach_hang|default:'' }}"
+                                   required
+                                   maxlength="100"
+                                   autocomplete="name">
+                        </div>
+                        <div class="field">
+                            <label for="recipient-phone">Số điện thoại *</label>
+                            <input type="tel"
+                                   id="recipient-phone"
+                                   name="so_dien_thoai"
+                                   value="{{ thong_tin.so_dien_thoai|default:'' }}"
+                                   required
+                                   pattern="0[0-9]{9}"
+                                   maxlength="10"
+                                   title="10 chữ số, bắt đầu bằng 0"
+                                   autocomplete="tel"
+                                   placeholder="0901234567">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="recipient-email">Email (không bắt buộc)</label>
+                        <input type="email"
+                               id="recipient-email"
+                               name="email"
+                               value="{{ thong_tin.email|default:'' }}"
+                               autocomplete="email">
+                    </div>
+                    <div class="field">
+                        <label for="recipient-address">Địa chỉ nhận hàng *</label>
+                        <textarea id="recipient-address"
+                                  name="dia_chi_giao_hang"
+                                  rows="3"
+                                  required
+                                  autocomplete="street-address"
+                                  placeholder="Số nhà, đường, phường/xã, tỉnh/thành phố">{{ thong_tin.dia_chi_giao_hang|default:'' }}</textarea>
+                    </div>
+                    <div class="field">
+                        <label for="order-note">Lời nhắn cho DHShop</label>
+                        <textarea id="order-note"
+                                  name="ghi_chu"
+                                  rows="2"
+                                  placeholder="Bạn có muốn nhắn thêm điều gì không?">{{ thong_tin.ghi_chu|default:'' }}</textarea>
+                    </div>
+                </section>
+                <section class="checkout-section">
+                    <h2>
+                        <span>02</span> Phương thức thanh toán
+                    </h2>
+                    <div class="payment-option">
+                        <input type="radio" id="cod-payment" name="phuong_thuc" value="cod" checked>
+                        <label for="cod-payment" class="mb-0">
+                            Thanh toán khi nhận hàng (COD)
+                            <span class="payment-description">Thanh toán cho người giao hàng khi nhận được đơn của bạn.</span>
+                        </label>
+                    </div>
+                </section>
+            </div>
+            <aside class="order-summary">
+                <h2>Những món đồ của bạn</h2>
+                {% for item in gio_hang %}
+                    <div class="mini-product">
+                        {% if item.san_pham.anh_dai_dien %}
+                            <img src="{{ item.san_pham.anh_dai_dien.url }}"
+                                 alt="{{ item.san_pham.ten_san_pham }}"
+                                 width="50"
+                                 height="65">
+                        {% else %}
+                            <img src="{% static 'images/product-placeholder.svg' %}"
+                                 alt="Sản phẩm chưa có ảnh"
+                                 width="50"
+                                 height="65">
+                        {% endif %}
+                        <div>
+                            {{ item.san_pham.ten_san_pham }}<small>{{ item.kich_co }} / {{ item.mau_sac }} · {{ item.so_luong }} món</small>
+                        </div>
+                        <span>{{ item.thanh_tien|vnd }}₫</span>
+                    </div>
+                {% endfor %}
+                <div class="summary-row">
+                    <span>Tạm tính</span>
+                    <span>{{ gio_hang.tong_tien|vnd }}₫</span>
+                </div>
+                <div class="summary-row">
+                    <span>Phí vận chuyển</span>
+                    <span>Miễn phí</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Tổng cộng</span>
+                    <strong>{{ gio_hang.tong_tien|vnd }}₫</strong>
+                </div>
+                <button type="submit" class="button">
+                    Xác nhận đặt hàng <span aria-hidden="true">↗</span>
+                </button>
+                <a class="summary-caption d-block"
+                   href="{% url 'gio_hang:xem_gio_hang' %}">← Quay lại giỏ hàng</a>
+            </aside>
+        </form>
+    </div>
+{% endblock %}
